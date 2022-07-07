@@ -25,7 +25,7 @@
 
 - More than 700k+ Definitions of word
 - [freedictionaryapi](https://github.com/ngocsangyem/freedictionaryapi) base on open source Wiktionary.
-- It is a simple and easy to use API to get the definition of a word. 
+- It is a simple and easy to use API to get the definition of a word.
 - It is a free and open source project.
 
 ## Development
@@ -40,11 +40,13 @@ npm start
 
 ## Usage
 
+### Definitions
+
 ```sh
 https://api.freedictionary.dev/api/{version}/entries/en/{word}
 ```
 
-## Type Definitions
+#### Type Definitions
 
 ```typescript
 interface IPhonetic {
@@ -71,20 +73,20 @@ interface ISynonym {
 interface IMeaning {
  definition: string;
  examples: string[]
- antonyms?: IAntonym[] | [];
- synonyms?: ISynonym[] | [];
+ antonyms?: IAntonym[] | null;
+ synonyms?: ISynonym[] | null;
 }
 
 interface IWord {
  word: string;
  partOfSpeech: string;
  phonetics?: IPhonetic[];
- meanings: IMeaning[],
- forms?: IForm[]
+ meanings: IMeaning[];
+ forms?: IForm[];
 }
 ```
 
-## Example
+#### Example
 
 ```sh
 https://api.freedictionary.dev/api/v1/entries/en/go
@@ -155,6 +157,58 @@ You will get result
 ]
 ```
 
+### Pronunciation
+
+```sh
+https://api.freedictionary.dev/api/{version}/pronunciation/en/{word}
+```
+
+#### Type Definitions
+
+```typescript
+interface IPhonetic {
+ type: string;
+ audio: string;
+}
+
+interface IPronunciation {
+  word: string;
+  phonetics: IPhonetic[];
+}
+```
+
+#### Example
+
+```sh
+https://api.freedictionary.dev/api/v1/entries/en/go
+```
+
+You will get result
+
+```json
+{
+  "word": "go",
+  "phonetics": [
+    {
+      "type": "uk",
+      "audio": "https://dictionary.cambridge.org/media/english/uk_pron/u/ukg/ukglu/ukglutt024.mp3"
+    },
+    {
+      "type": "us",
+      "audio": "https://dictionary.cambridge.org/media/english/us_pron/g/go_/go___/go.mp3"
+    },
+    {
+      "type": "uk",
+      "audio": "https://dictionary.cambridge.org/media/english/uk_pron/u/ukg/ukglu/ukglutt024.mp3"
+    },
+    {
+      "type": "us",
+      "audio": "https://dictionary.cambridge.org/media/english/us_pron/g/go_/go___/go.mp3"
+    }
+  ]
+}
+```
+
 ## Todo
 
 - Performance query
@@ -165,10 +219,10 @@ You will get result
 
 👤 **ngocsangyem**
 
-* Website: <https://www.ngocsangyem.dev/>
-* Twitter: [@ngocsangyem](https://twitter.com/ngocsangyem)
-* Github: [@ngocsangyem](https://github.com/ngocsangyem)
-* LinkedIn: [@ngocsangyem](https://linkedin.com/in/ngocsangyem)
+- Website: <https://www.ngocsangyem.dev/>
+- Twitter: [@ngocsangyem](https://twitter.com/ngocsangyem)
+- Github: [@ngocsangyem](https://github.com/ngocsangyem)
+- LinkedIn: [@ngocsangyem](https://linkedin.com/in/ngocsangyem)
 
 ## 🤝 Contributing
 
