@@ -4,7 +4,10 @@
 	"description": "Dictionary for EDict extension",
 	"main": "src/app.js",
 	"scripts": {
-		"start": "node ./src/app.js"
+		"start": "node ./src/app.js",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:serve": "vitepress serve docs"
 	},
 	"repository": {
 		"type": "git",
@@ -28,5 +31,16 @@
 		"express-rate-limit": "^6.3.0",
 		"jsdom": "^19.0.0",
 		"node-fetch": "^2.6.7"
+	},
+	"devDependencies": {
+		"@iconify/vue": "^3.2.1",
+		"@vueuse/core": "^8.9.0",
+		"autoprefixer": "^10.4.7",
+		"floating-vue": "^2.0.0-beta.17",
+		"postcss": "^8.4.14",
+		"sass": "^1.53.0",
+		"tailwindcss": "^3.1.4",
+		"vitepress": "^1.0.0-alpha.4",
+		"vue": "^3.2.37"
 	}
 }
