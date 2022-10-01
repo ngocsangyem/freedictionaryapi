@@ -209,6 +209,14 @@ You will get result
 }
 ```
 
+## Note
+
+If you are using linguarobot, create `.env` and add linguarobot API key to it.
+
+```
+API_KEY=xxxxx
+```
+
 ## Todo
 
 - Performance query
