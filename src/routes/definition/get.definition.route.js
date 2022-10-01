@@ -5,7 +5,7 @@ const { resolve } = require('path');
 const Utils = require('../../utils/utils');
 const errors = require('../../utils/errors');
 
-const WikDictionary = require('../../modules/wiktionary/dictionary');
+const LinguaDictionary = require('../../modules/lingua-robot/dictionary');
 const CamDictionary = require('../../modules/cambridge/dictionary');
 
 /**
@@ -51,15 +51,9 @@ const getDefinition = router.get(
 					reason: 'Only English is supported at the moment.',
 				});
 			}
-			const filePath = resolve(
-				__dirname,
-				'..',
-				'..',
-				'data',
-				'dict_chunk.txt'
-			);
-			const dictionary = new WikDictionary();
-			const meaning = await dictionary.meaning(word, filePath);
+
+			const dictionary = new LinguaDictionary();
+			const meaning = await dictionary.meaning(word);
 
 			res.set(Utils.HEADER_CONTENT_TYPE, 'application/json');
 			res.set(Utils.HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, '*');

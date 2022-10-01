@@ -25,7 +25,9 @@
 	},
 	"homepage": "https://github.com/ngocsangyem/freedictionaryapi#readme",
 	"dependencies": {
+		"axios": "^0.27.2",
 		"cheerio": "^1.0.0-rc.10",
+		"dotenv": "^16.0.3",
 		"event-stream": "^4.0.1",
 		"express": "^4.17.3",
 		"express-rate-limit": "^6.3.0",
