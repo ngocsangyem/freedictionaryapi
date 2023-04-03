@@ -1,45 +1,37 @@
-const fs = require('fs');
-const es = require('event-stream');
-
+const { MongoClient } = require('mongodb');
 const errors = require('../../utils/errors');
+require('dotenv').config();
 
 class Dictionary {
-	async meaning(word, filePath) {
+	async meaning(word) {
+		const client = new MongoClient(process.env.APP_URI);
+
 		try {
 			if (typeof word !== 'string') {
 				throw new errors.NoDefinitionsFound({
 					reason: 'Word must be a string!',
 				});
 			}
-			const definitions = await this.resolveStream(word, filePath);
-			return definitions;
+
+			await client.connect();
+
+			const result = await client
+				.db('english_dictionary')
+				.collection('english_dictionary')
+				.findOne({ wiki: word });
+
+			if (!result) {
+				throw new errors.NoDefinitionsFound();
+			}
+
+			return result.data;
 		} catch (error) {
 			throw new errors.NoDefinitionsFound({
 				reason: 'Website returned 404.',
 			});
+		} finally {
+			await client.close();
 		}
-	}
-
-	resolveStream(word, filePath) {
-		return new Promise((resolve, reject) => {
-			let wordDefinition;
-			const stream = fs
-				.createReadStream(filePath)
-				.pipe(es.split())
-				.pipe(es.filterSync((line) => line))
-				.pipe(
-					es.mapSync((line) => {
-						const obj = JSON.parse(line);
-						if (obj[word]) {
-							wordDefinition = obj[word];
-							stream.end();
-						}
-					})
-				)
-				.on('end', () => {
-					resolve(wordDefinition);
-				});
-		});
 	}
 }
 

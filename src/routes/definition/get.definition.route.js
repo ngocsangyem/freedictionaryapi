@@ -5,7 +5,7 @@ const { resolve } = require('path');
 const Utils = require('../../utils/utils');
 const errors = require('../../utils/errors');
 
-const LinguaDictionary = require('../../modules/lingua-robot/dictionary');
+const WikiDictionary = require('../../modules/wiktionary/dictionary');
 const CamDictionary = require('../../modules/cambridge/dictionary');
 
 /**
@@ -52,7 +52,7 @@ const getDefinition = router.get(
 				});
 			}
 
-			const dictionary = new LinguaDictionary();
+			const dictionary = new WikiDictionary();
 			const meaning = await dictionary.meaning(word);
 
 			res.set(Utils.HEADER_CONTENT_TYPE, 'application/json');
