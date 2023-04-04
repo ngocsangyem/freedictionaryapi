@@ -15,10 +15,13 @@ class Dictionary {
 
 			await client.connect();
 
-			const result = await client
-				.db('english_dictionary')
-				.collection('english_dictionary')
-				.findOne({ wiki: word });
+			const db = client.db('english_dictionary');
+			const collection = db.collection('english_dictionary');
+
+			// Create an index on the "wiki" field
+			await collection.createIndexes([{ key: { wiki: 1 } }]);
+
+			const result = await collection.findOne({ wiki: word });
 
 			if (!result) {
 				throw new errors.NoDefinitionsFound();
