@@ -53,14 +53,18 @@ const getDefinition = router.get(
 			}
 
 			const dictionary = new WikiDictionary();
+			await dictionary.initialize();
 			const meaning = await dictionary.meaning(word);
 
 			res.set(Utils.HEADER_CONTENT_TYPE, 'application/json');
 			res.set(Utils.HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, '*');
 
 			if (!meaning) {
+				await dictionary.close();
 				throw new errors.NoDefinitionsFound();
 			}
+
+			await dictionary.close();
 			return res.status(200).send(meaning);
 		} catch (error) {
 			console.log('error', error);
