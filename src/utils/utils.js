@@ -4,36 +4,8 @@ const errors = require('./errors');
 const { JSDOM } = require('jsdom');
 const { DOMParser } = new JSDOM().window;
 
-const parser = new DOMParser();
-const V1 = 'v1';
-const V2 = 'v2';
-const SUPPORTED_VERSIONS = new Set([V1, V2]);
-const SUPPORTED_LANGUAGES = new Set([
-	// 'hi', // Hindi
-	'en', // English (US)
-	'english', // English (US)
-	'en-uk', // English (UK)
-	// 'es', // Spanish
-	// 'fr', // French
-	// 'ja', // Japanese
-	// 'cs', // Czech
-	// 'nl', // Dutch
-	// 'sk', // Slovak
-	// 'ru', // Russian
-	// 'de', // German
-	// 'it', // Italian
-	// 'ko', // Korean
-	// 'pt-BR', // Brazilian Portuguese
-	// 'ar', // Arabic
-	// 'tr', // Turkish
-	'vi', // Vietnamese
-	'english-vietnamese', // Vietnamese
-]);
-const REQUEST_TYPE_STATUS_CODE = {
-	notFound: 404,
-	rateLimit: 429,
-	serverError: 500,
-};
+const SUPPORTED_VERSIONS = new Set(['v1', 'v2']);
+const SUPPORTED_LANGUAGES = new Set(['en', 'english', 'en-uk', 'vi', 'english-vietnamese']);
 
 const Utils = {
 	async getHTML(url) {
@@ -48,12 +20,11 @@ const Utils = {
 				redirect: 'follow',
 				cache: 'force-cache',
 			});
-			const isRedirected = res.redirected;
-			if (res.status !== 200) return '';
+			if (!res.ok) return '';
 			const html = await res.text();
-			return { html, url: res.url, isRedirected };
+			return { html, url: res.url, isRedirected: res.redirected };
 		} catch (e) {
-			console.log('error', e);
+			console.error('Error fetching HTML:', e);
 			return '';
 		}
 	},
@@ -63,7 +34,6 @@ const Utils = {
 			throw new errors.UnexpectedError({
 				reason: `The html type must be a string, received "${typeof html}"!`,
 			});
-
 		return cheerio.load(html);
 	},
 
@@ -89,55 +59,30 @@ const Utils = {
 		return SUPPORTED_VERSIONS.has(version);
 	},
 
-	checkBody(data) {
-		return JSON.stringify(data, (key, value) => {
-			if (typeof value === 'object') {
-				return value;
-			}
-
-			return this.cleanText(value);
-		});
-	},
-
 	cleanText(text) {
 		if (!text) {
 			return text;
 		}
-
-		return parser.parseFromString(text, 'text/html').body.textContent;
+		return new DOMParser().parseFromString(text, 'text/html').body.textContent;
 	},
 
 	getUrlParameter(url, name) {
 		name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
 		const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
 		const results = regex.exec(url);
-		return results === null
-			? ''
-			: decodeURIComponent(results[1].replace(/\+/g, ' '));
+		return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 	},
 
-	handleError(errors = {}) {
-		// Using duck typing to know if we explicitly threw this error
-		// If not then wrapping original error into UnexpectedError
+	handleError(err = {}) {
 		if (!errors.requestType) {
-			errors = new errors.UnexpectedError({ original_error: errors });
+			err = new errors.UnexpectedError({ original_error: err });
 		}
-
-		const { requestType, title, message, resolution } = errors;
-		const status = REQUEST_TYPE_STATUS_CODE[requestType];
-		const body = JSON.stringify({
-			title,
-			message,
-			resolution,
-		});
-
-		this.set('Content-Type', 'application/json');
-		this.set('Access-Control-Allow-Origin', '*');
-
-		return this.status(status).send(body);
+		const { requestType, title, message, resolution } = err;
+		const status = { notFound: 404, rateLimit: 429, serverError: 500 }[requestType];
+		const body = JSON.stringify({ title, message, resolution });
+		console.error('Error:', body);
+		return { status, body };
 	},
-	HEADER_CONTENT_TYPE: 'Content-Type',
-	HEADER_ACCESS_CONTROL_ALLOW_ORIGIN: 'Access-Control-Allow-Origin',
 };
 
 module.exports = Utils;
