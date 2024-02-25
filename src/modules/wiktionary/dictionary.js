@@ -17,7 +17,7 @@ class Dictionary {
 			// Create an index on the "wiki" field if not already created
 			const indexExists = await this.collection.indexExists('wiki');
 			if (!indexExists) {
-				await this.collection.createIndex({ wiki: 1 });
+				await this.collection.createIndex({ word: 1, partOfSpeech: 1, meaning: 1 });
 			}
 		} catch (error) {
 			throw new errors.NoDefinitionsFound();
@@ -25,7 +25,13 @@ class Dictionary {
 	}
 
 	async close() {
-		await this.client.close();
+		try {
+			await this.client.close();
+		} catch (error) {
+			throw new errors.NoDefinitionsFound({
+				reason: 'Website returned 404.',
+			});
+		}
 	}
 
 	async meaning(word) {
