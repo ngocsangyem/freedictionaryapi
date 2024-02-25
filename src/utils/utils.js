@@ -5,7 +5,27 @@ const { JSDOM } = require('jsdom');
 const { DOMParser } = new JSDOM().window;
 
 const SUPPORTED_VERSIONS = new Set(['v1', 'v2']);
-const SUPPORTED_LANGUAGES = new Set(['en', 'english', 'en-uk', 'vi', 'english-vietnamese']);
+const SUPPORTED_LANGUAGES = new Set([
+	// 'hi', // Hindi
+	'en', // English (US)
+	'english', // English (US)
+	'en-uk', // English (UK)
+	// 'es', // Spanish
+	// 'fr', // French
+	// 'ja', // Japanese
+	// 'cs', // Czech
+	// 'nl', // Dutch
+	// 'sk', // Slovak
+	// 'ru', // Russian
+	// 'de', // German
+	// 'it', // Italian
+	// 'ko', // Korean
+	// 'pt-BR', // Brazilian Portuguese
+	// 'ar', // Arabic
+	// 'tr', // Turkish
+	'vi', // Vietnamese
+	'english-vietnamese', // Vietnamese
+]);
 
 const Utils = {
 	async getHTML(url) {

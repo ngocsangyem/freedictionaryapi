@@ -14,7 +14,7 @@ const CamDictionary = require('../../modules/cambridge/dictionary');
 
 const getDefinition = router.get(
 	'/api/:version/entries/:language/:word',
-	async (req, res, next) => {
+	async (req, res ) => {
 		let { word, language, version } = req.params;
 		word = decodeURIComponent(word).trim().toLocaleLowerCase();
 
@@ -56,8 +56,8 @@ const getDefinition = router.get(
 			await dictionary.initialize();
 			const meaning = await dictionary.meaning(word);
 
-			res.set(Utils.HEADER_CONTENT_TYPE, 'application/json');
-			res.set(Utils.HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, '*');
+			res.set('Content-Type', 'application/json');
+			res.set('Access-Control-Allow-Origin', '*');
 
 			if (!meaning) {
 				await dictionary.close();
