@@ -1,62 +1,27 @@
-const { MongoClient } = require('mongodb');
 const errors = require('../../utils/errors');
+const readline = require('readline');
+const { createReadStream } = require('fs');
 require('dotenv').config();
 
 class Dictionary {
 	constructor() {
-		this.client = new MongoClient(process.env.APP_URI);
-		this.collection = null;
+		this.dictionaryData = new Map();
 	}
 
-	async initialize() {
-		try {
-			await this.client.connect();
-			const db = this.client.db('english_dictionary');
-			this.collection = db.collection('english_dictionary');
+	async loadDictionary(filePath) {
+		const fileStream = createReadStream(filePath);
+		const rl = readline.createInterface({
+			input: fileStream,
+			crlfDelay: Infinity
+		});
 
-			// Create an index on the "wiki" field if not already created
-			const indexExists = await this.collection.indexExists('wiki');
-			if (!indexExists) {
-				await this.collection.createIndex({ word: 1, partOfSpeech: 1, meaning: 1 });
-			}
-		} catch (error) {
-			throw new errors.NoDefinitionsFound();
+		for await (const line of rl) {
+			const entry = JSON.parse(line);
+			const [word, definitions] = Object.entries(entry)[0];
+			this.dictionaryData.set(word, definitions);
 		}
-	}
 
-	async close() {
-		try {
-			await this.client.close();
-		} catch (error) {
-			throw new errors.NoDefinitionsFound({
-				reason: 'Website returned 404.',
-			});
-		}
-	}
-
-	async meaning(word) {
-		try {
-			if (typeof word !== 'string') {
-				throw new errors.NoDefinitionsFound({
-					reason: 'Word must be a string!',
-				});
-			}
-
-			const result = await this.collection.findOne(
-				{ wiki: word },
-				{ projection: { data: 1 } }
-			);
-
-			if (!result) {
-				throw new errors.NoDefinitionsFound();
-			}
-
-			return result.data;
-		} catch (error) {
-			throw new errors.NoDefinitionsFound({
-				reason: 'Website returned 404.',
-			});
-		}
+		console.log('Dictionary loaded successfully');
 	}
 }
 

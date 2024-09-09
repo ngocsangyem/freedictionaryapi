@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { resolve } = require('path');
+const path = require('path');
 
 const Utils = require('../../utils/utils');
 const errors = require('../../utils/errors');
 
-const WikiDictionary = require('../../modules/wiktionary/dictionary');
 const CamDictionary = require('../../modules/cambridge/dictionary');
 
 /**
@@ -13,8 +12,8 @@ const CamDictionary = require('../../modules/cambridge/dictionary');
  */
 
 const getDefinition = router.get(
-	'/api/:version/entries/:language/:word',
-	async (req, res ) => {
+	'/:version/entries/:language/:word',
+	async (req, res) => {
 		let { word, language, version } = req.params;
 		word = decodeURIComponent(word).trim().toLocaleLowerCase();
 
@@ -52,29 +51,27 @@ const getDefinition = router.get(
 				});
 			}
 
-			const dictionary = new WikiDictionary();
-			await dictionary.initialize();
-			const meaning = await dictionary.meaning(word);
+			const meaning = req.dictionary.get(word);
 
 			res.set('Content-Type', 'application/json');
 			res.set('Access-Control-Allow-Origin', '*');
 
 			if (!meaning) {
-				await dictionary.close();
 				throw new errors.NoDefinitionsFound();
 			}
 
-			await dictionary.close();
 			return res.status(200).send(meaning);
 		} catch (error) {
 			console.log('error', error);
-			return Utils.handleError.call(res, error);
+			throw new errors.NoDefinitionsFound({
+				reason: 'Website returned 404.',
+			});
 		}
 	}
 );
 
 const getPronunciation = router.get(
-	'/api/:version/pronunciation/:language/:word',
+	'/:version/pronunciation/:language/:word',
 	async (req, res, next) => {
 		let { word, language, version } = req.params;
 		word = decodeURIComponent(word).trim().toLocaleLowerCase();
@@ -119,7 +116,9 @@ const getPronunciation = router.get(
 			return res.send(body);
 		} catch (error) {
 			console.log('error', error);
-			return Utils.handleError.call(res, error);
+			throw new errors.NoDefinitionsFound({
+				reason: 'Website returned 404.',
+			});
 		}
 	}
 );
