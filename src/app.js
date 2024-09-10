@@ -1,6 +1,6 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const { getDefinition, getPronunciation } = require('./routes/definition');
+const { getDefinition } = require('./routes/definition');
 const WikiDictionary = require('./modules/wiktionary/dictionary');
 const path = require('path');
 
@@ -31,16 +31,12 @@ app.set('trust proxy', true);
 app.use(limiter);
 
 initializeDictionary().then(() => {
-	// Pass the dictionary to the routes
 	app.use((req, res, next) => {
 		req.dictionary = dictionary;
 		next();
 	});
 
 	app.use('/api', getDefinition);
-	app.use('/api', getPronunciation);
-
-	// ... other app configurations ...
 
 	app.listen(PORT, host, () => {
 		console.log('Server is running on port 3000');

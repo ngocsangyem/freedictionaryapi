@@ -5,11 +5,9 @@ const path = require('path');
 const Utils = require('../../utils/utils');
 const errors = require('../../utils/errors');
 
-const CamDictionary = require('../../modules/cambridge/dictionary');
-
 /**
  * Get definition
- */
+*/
 
 const getDefinition = router.get(
 	'/:version/entries/:language/:word',
@@ -70,57 +68,4 @@ const getDefinition = router.get(
 	}
 );
 
-const getPronunciation = router.get(
-	'/:version/pronunciation/:language/:word',
-	async (req, res, next) => {
-		let { word, language, version } = req.params;
-		word = decodeURIComponent(word).trim().toLocaleLowerCase();
-
-		if (!word || !language || !version) {
-			return Utils.handleError.call(res, new errors.NoDefinitionsFound());
-		}
-
-		if (!Utils.isVersionSupported(version)) {
-			return Utils.handleError.call(res, new errors.NoDefinitionsFound());
-		}
-
-		if (language === 'en_US' || language === 'en_GB' || language === 'en') {
-			language = 'english';
-		}
-
-		if (language !== 'english') {
-			return Utils.handleError.call(
-				res,
-				new errors.NoPronunciationFound()
-			);
-		}
-
-		language = language.toLowerCase();
-
-		word = word.trim().toLocaleLowerCase(language);
-
-		try {
-			const dictionary = new CamDictionary();
-			const pronunciation = await dictionary.pronunciation(
-				word,
-				language
-			);
-
-			const body = Utils.checkBody(pronunciation);
-
-			res.set(Utils.HEADER_CONTENT_TYPE, 'application/json');
-			res.set(Utils.HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, '*');
-			if (!body) {
-				throw new errors.NoPronunciationFound();
-			}
-			return res.send(body);
-		} catch (error) {
-			console.log('error', error);
-			throw new errors.NoDefinitionsFound({
-				reason: 'Website returned 404.',
-			});
-		}
-	}
-);
-
-module.exports = { getDefinition, getPronunciation };
+module.exports = { getDefinition };
